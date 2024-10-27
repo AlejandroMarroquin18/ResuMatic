@@ -1,4 +1,5 @@
 const { analyzeImage, extractTextFromImage } = require('../services/azureVisionService');
+const { extractDetails, extractUser, extractType, extractContract } = require('../services/geminiService');
 
 // Controlador para analizar imágenes
 const analyzeImageHandler = async (req, res) => {
@@ -19,25 +20,34 @@ const analyzeImageHandler = async (req, res) => {
 
 // Controlador para extraer texto usando OCR
 const extractTextHandler = async (req, res) => {
-    if (!req.file || !req.file.mimetype.startsWith('image/')) {
-      return res.status(400).send('Por favor, sube un archivo de imagen válido.');
-    }
-  
-    const imageBuffer = req.file.buffer;
-  
-    try {
-      const ocrResult = await extractTextFromImage(imageBuffer);
-  
-      // Recorrer las regiones, líneas y palabras para concatenar todo el texto en una sola línea
-      const extractedText = ocrResult.regions
-        .map(region => region.lines.map(line => line.words.map(word => word.text).join(' ')).join(' '))
-        .join(' ');
-  
-      res.json({ éxito: true, textoExtraído: extractedText });
-    } catch (error) {
-      console.error('Error al extraer texto de la imagen:', error);
-      res.status(500).send('Error al extraer el texto. Por favor, intenta nuevamente más tarde.');
-    }
-  };  
+  if (!req.file || !req.file.mimetype.startsWith('image/')) {
+    return res.status(400).send('Por favor, sube un archivo de imagen válido.');
+  }
 
-module.exports = { analyzeImageHandler, extractTextHandler };
+  const imageBuffer = req.file.buffer;
+
+  try {
+    const ocrResult = await extractTextFromImage(imageBuffer);
+
+    const extractedText = ocrResult.regions
+      .map(region => region.lines.map(line => line.words.map(word => word.text).join(' ')).join(' '))
+      .join(' ');
+
+    // Extraer el precio y el beneficiario de la factura en consultas separadas
+    const tipo = await extractType(extractedText);
+    const contrato = await extractContract(extractedText);
+    const precio = await extractDetails(extractedText);
+    const beneficiario = await extractUser(extractedText);
+
+    if (precio || beneficiario || tipo || contrato) {
+      res.json({ éxito: true, textoExtraído: contrato, tipo, precio, beneficiario });
+    } else {
+      res.json({ éxito: true, textoExtraído: extractedText, mensaje: 'No se encontraron datos válidos en el texto.' });
+    }
+  } catch (error) {
+    console.error('Error al extraer o analizar el texto:', error);
+    res.status(500).send('Error al extraer el texto. Por favor, intenta nuevamente más tarde.');
+  }
+};
+
+module.exports = { analyzeImageHandler, extractTextHandler, };
