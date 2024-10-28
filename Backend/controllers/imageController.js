@@ -1,10 +1,9 @@
 const { analyzeImage, extractTextFromImage } = require('../services/azureVisionService');
 const { extractDetails, extractUser, extractType, extractContract } = require('../services/geminiService');
 
-// Controlador para analizar imágenes
 const analyzeImageHandler = async (req, res) => {
   if (!req.file || !req.file.mimetype.startsWith('image/')) {
-    return res.status(400).send('Por favor, sube un archivo de imagen válido.');
+    return res.status(400).json({ éxito: false, mensaje: 'Por favor, sube un archivo de imagen válido.' });
   }
 
   const imageBuffer = req.file.buffer;
@@ -13,15 +12,17 @@ const analyzeImageHandler = async (req, res) => {
     const analysisResult = await analyzeImage(imageBuffer);
     res.json({ éxito: true, datos: analysisResult });
   } catch (error) {
-    console.error('Error al analizar la imagen:', error);
-    res.status(500).send('Error al analizar la imagen. Por favor, intenta nuevamente más tarde.');
+    console.error('Error al analizar la imagen:', error.message);  // Error detallado
+    res.status(500).json({ éxito: false, mensaje: 'Error al analizar la imagen. Por favor, intenta nuevamente más tarde.', error: error.message });
   }
 };
 
-// Controlador para extraer texto usando OCR
+
 const extractTextHandler = async (req, res) => {
-  if (!req.file || !req.file.mimetype.startsWith('image/')) {
-    return res.status(400).send('Por favor, sube un archivo de imagen válido.');
+  if (!req.file || !req.file.mimetype.startsWith('image/'))
+
+    return res.status(400).json({ éxito: false, mensaje: 'Por favor, sube un archivo de imagen válido.' });
+
   }
 
   const imageBuffer = req.file.buffer;
@@ -32,7 +33,7 @@ const extractTextHandler = async (req, res) => {
     const extractedText = ocrResult.regions
       .map(region => region.lines.map(line => line.words.map(word => word.text).join(' ')).join(' '))
       .join(' ');
-
+    
     // Extraer el precio y el beneficiario de la factura en consultas separadas
     const tipo = await extractType(extractedText);
     const contrato = await extractContract(extractedText);
@@ -47,6 +48,13 @@ const extractTextHandler = async (req, res) => {
   } catch (error) {
     console.error('Error al extraer o analizar el texto:', error);
     res.status(500).send('Error al extraer el texto. Por favor, intenta nuevamente más tarde.');
+    
+    res.json({ éxito: true, textoExtraído: extractedText });
+  } catch (error) {
+    console.error('Error al extraer texto de la imagen:', error);
+    res.status(500).json({ éxito: false, mensaje: 'Error al extraer el texto. Por favor, intenta nuevamente más tarde.' });
+
+
   }
 };
 
