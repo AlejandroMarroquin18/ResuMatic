@@ -18,15 +18,13 @@ async function analyzeImage(imageBuffer) {
           'Ocp-Apim-Subscription-Key': azureVisionService.subscriptionKey,
           'Content-Type': 'application/octet-stream',
         },
-        params: {
-            'language': 'es', // Establecer idioma español
-        },
+        params: { language: 'es' },
       }
     );
     return response.data;
   } catch (error) {
     console.error('Error al llamar a la API de Azure:', error.response ? error.response.data : error.message);
-    throw new Error('Error al analizar la imagen.');
+    throw new Error('Error al analizar la imagen en Azure. Verifica el endpoint y la clave de suscripción.');
   }
 }
 
