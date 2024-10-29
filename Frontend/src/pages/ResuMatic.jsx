@@ -1,6 +1,10 @@
 // ResuMatic.jsx
 import React, { useState } from 'react';
 import { Box, Button, Typography, Tabs, Tab, Card, CardContent, CardHeader } from '@mui/material';
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
+
+ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 export default function ResuMatic() {
   const [file, setFile] = useState(null);
@@ -41,6 +45,38 @@ export default function ResuMatic() {
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
+  };
+
+  // Configuración de datos y opciones para el gráfico de barras
+  const chartData = {
+    labels: billData ? Object.keys(billData.consumptionData || {}) : [],
+    datasets: [
+      {
+        label: 'Consumo Mensual',
+        data: billData ? Object.values(billData.consumptionData || {}) : [],
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' },
+      tooltip: {
+        callbacks: {
+          label: (context) => `Consumo: ${context.raw} kWh`,
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: { display: true, text: 'Consumo (kWh)' },
+      },
+    },
   };
 
   return (
@@ -107,6 +143,23 @@ export default function ResuMatic() {
                     <Typography>Consumo actual: {billData.currentConsumption} kWh</Typography>
                     <Typography>Monto a pagar: ${billData.totalAmount}</Typography>
                     <Typography>Fecha de vencimiento: {billData.dueDate}</Typography>
+                  </Box>
+                )}
+
+                {tabValue === 1 && (
+                  <Box sx={{ marginTop: 2 }}>
+                    <Typography variant="h6">Consumo de los últimos meses:</Typography>
+                    <Bar data={chartData} options={chartOptions} />
+                  </Box>
+                )}
+
+                {tabValue === 2 && (
+                  <Box sx={{ marginTop: 2 }}>
+                    <Typography>Monto a pagar: ${billData.totalAmount}</Typography>
+                    <Typography>Fecha de vencimiento: {billData.dueDate}</Typography>
+                    <Button variant="contained" color="success" sx={{ marginTop: 2 }}>
+                      Ir a la página de pago
+                    </Button>
                   </Box>
                 )}
               </>
