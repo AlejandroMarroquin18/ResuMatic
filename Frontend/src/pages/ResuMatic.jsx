@@ -1,6 +1,6 @@
-// ResuMatic.jsx
 import React, { useState } from 'react';
-import { Box, Button, Typography, Tabs, Tab, Card, CardContent, CardHeader } from '@mui/material';
+import { Box, Button, Typography, Tabs, Tab, Card, CardContent, CardHeader, Divider, Grid } from '@mui/material';
+import { UploadFile, Description, BarChart, Payment, InsertDriveFile } from '@mui/icons-material';
 
 export default function ResuMatic() {
   const [file, setFile] = useState(null);
@@ -44,78 +44,122 @@ export default function ResuMatic() {
   };
 
   return (
-    <Box sx={{ padding: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        ResuMatic
-      </Typography>
+    <Box sx={{ padding: 4, backgroundColor: '#f4f6f8', minHeight: '100vh', textAlign: 'center' }}>
+      {/* Título centrado con icono y descripción */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
+        <Description fontSize="large" color="primary" />
+        <Typography variant="h4" sx={{ color: '#2c3e50', fontWeight: 'bold', mt: 1 }}>
+          ResuMatic
+        </Typography>
+      </Box>
 
-      <div className="card-container">
-        <Card>
-          <CardHeader title="Subir Recibo" />
-          <CardContent>
-            <Box
-              sx={{
-                border: '2px dashed grey',
-                borderRadius: 2,
-                padding: 2,
-                textAlign: 'center',
-                cursor: 'pointer',
-              }}
-              onClick={() => document.getElementById('fileInput').click()}
-            >
-              {file ? (
-                <Typography variant="body1" color="primary">
-                  Archivo seleccionado: {file.name}
-                </Typography>
-              ) : (
-                <>
-                  <Typography variant="body1">Haga clic para subir o arrastre una imagen aquí</Typography>
-                  <Typography variant="caption">
-                    Formatos admitidos: JPEG, PNG, GIF, BMP, TIFF. Tamaño máximo: 4MB
+      <Grid container spacing={4} justifyContent="center">
+        {/* Card de Subir Recibo */}
+        <Grid item xs={12} md={5}>
+          <Card sx={{ backgroundColor: '#e3f2fd', borderRadius: 3, boxShadow: 3, padding: 2 }}>
+            <CardHeader title="Subir Recibo" sx={{ color: '#1e88e5', textAlign: 'center' }} />
+            <Divider />
+            <CardContent sx={{ textAlign: 'center', position: 'relative' }}>
+              <Box
+                sx={{
+                  border: '2px dashed #90caf9',
+                  borderRadius: 2,
+                  padding: 3,
+                  cursor: 'pointer',
+                  wordWrap: 'break-word',  // Permite que el texto se ajuste en varias líneas si es necesario
+                  '&:hover': { backgroundColor: '#e3f2fd' },
+                }}
+                onClick={() => document.getElementById('fileInput').click()}
+              >
+                {file ? (
+                  <Typography
+                    variant="body1"
+                    color="primary"
+                    sx={{
+                      display: 'inline-block',
+                      textAlign: 'center',
+                    }}
+                  >
+                    Archivo seleccionado: {file.name}
                   </Typography>
-                </>
-              )}
-              <input
-                id="fileInput"
-                type="file"
-                hidden
-                onChange={handleFileChange}
-                accept=".jpg,.jpeg,.png,.gif,.bmp,.tiff"
-              />
-            </Box>
-            <Button variant="contained" fullWidth sx={{ marginTop: 2 }} onClick={analyzeImage}>
-              Analizar Imagen
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader title="Resumen del Recibo" />
-          <CardContent>
-            {billData ? (
-              <>
-                <Tabs value={tabValue} onChange={handleTabChange}>
-                  <Tab label="Todos" />
-                  <Tab label="Consumo" />
-                  <Tab label="Pago" />
-                </Tabs>
-
-                {tabValue === 0 && (
-                  <Box sx={{ marginTop: 2 }}>
-                    <Typography>Servicio: {billData.service}</Typography>
-                    <Typography>Contrato: {billData.contractNumber}</Typography>
-                    <Typography>Consumo actual: {billData.currentConsumption} kWh</Typography>
-                    <Typography>Monto a pagar: ${billData.totalAmount}</Typography>
-                    <Typography>Fecha de vencimiento: {billData.dueDate}</Typography>
-                  </Box>
+                ) : (
+                  <>
+                    <UploadFile fontSize="large" sx={{ color: '#1e88e5', marginBottom: 1 }} />
+                    <Typography variant="body1">Haga clic para subir o arrastre una imagen aquí</Typography>
+                    <Typography variant="caption" display="block" sx={{ color: '#5c6bc0' }}>
+                      Formatos admitidos: JPEG, PNG, GIF, BMP, TIFF. Tamaño máximo: 4MB
+                    </Typography>
+                  </>
                 )}
-              </>
-            ) : (
-              <Typography>Sube un recibo para ver el resumen aquí.</Typography>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                <input
+                  id="fileInput"
+                  type="file"
+                  hidden
+                  onChange={handleFileChange}
+                  accept=".jpg,.jpeg,.png,.gif,.bmp,.tiff"
+                />
+              </Box>
+              <Button
+                variant="contained"
+                fullWidth
+                sx={{
+                  marginTop: 2,
+                  backgroundColor: '#1e88e5',
+                  color: '#fff',
+                  fontWeight: 'bold',
+                  '&:hover': { backgroundColor: '#1565c0' },
+                }}
+                onClick={analyzeImage}
+              >
+                Analizar Imagen
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Card de Resumen del Recibo */}
+        <Grid item xs={12} md={5}>
+          <Card sx={{ borderRadius: 3, boxShadow: 3, padding: 2 }}>
+            <CardHeader title="Resumen del Recibo" sx={{ color: '#3949ab', textAlign: 'center' }} />
+            <Divider />
+            <CardContent>
+              {billData ? (
+                <>
+                  <Tabs
+                    value={tabValue}
+                    onChange={handleTabChange}
+                    textColor="primary"
+                    indicatorColor="primary"
+                    centered
+                    sx={{ marginBottom: 2 }}
+                  >
+                    <Tab icon={<Description />} label="Todos" />
+                    <Tab icon={<BarChart />} label="Consumo" />
+                    <Tab icon={<Payment />} label="Pago" />
+                  </Tabs>
+
+                  {tabValue === 0 && (
+                    <Box sx={{ marginTop: 2, textAlign: 'left', color: '#2c3e50' }}>
+                      <Typography>Servicio: {billData.service}</Typography>
+                      <Typography>Número de Contrato: {billData.contractNumber}</Typography>
+                      <Typography>Consumo Actual: {billData.currentConsumption} kWh</Typography>
+                      <Typography>Monto a Pagar: ${billData.totalAmount}</Typography>
+                      <Typography>Fecha de Vencimiento: {billData.dueDate}</Typography>
+                    </Box>
+                  )}
+                </>
+              ) : (
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#757575', mt: 3 }}>
+                  <InsertDriveFile fontSize="large" sx={{ fontSize: 60, color: '#cfd8dc' }} />
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    Sube un recibo para ver el resumen aquí.
+                  </Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
     </Box>
   );
 }
