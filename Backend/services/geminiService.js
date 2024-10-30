@@ -1,19 +1,17 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const dotenv = require('dotenv');
 
+
 dotenv.config();
 
 // Inicializar Gemini con la clave API
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
 
 async function extractType(text) {
   let tipoFactura = null;
 
   try {
-    console.log('Iniciando proceso para extraer el tipo de la factura...');
-    console.log('Texto recibido:', text);
-
-    const model = await genAI.getGenerativeModel({ model: 'gemini-pro' });
 
     // Prompt para obtener uno o más tipos de servicios en la factura
     const prompt = `Tengo un texto extraído de una factura. Mi objetivo es identificar el tipo de servicio o servicios de la factura, que pueden ser uno o varios de los siguientes: agua, energía, internet, gas, o televisión (tv).
@@ -44,12 +42,9 @@ async function extractType(text) {
 
     Aumenta la precisión para que solo el tipo o tipos de servicio identificados sean devueltos en el formato indicado.`;
 
-    console.log('Prompt creado para el tipo de factura:', prompt);
-
     // Enviar el prompt al modelo
     const result = await model.generateContent(prompt);
-    console.log('Respuesta recibida para el tipo de factura:', result);
-
+ 
     // Almacenar directamente el texto de la respuesta
     tipoFactura = result.response.text().trim();
     console.log('Tipo de factura extraído:', tipoFactura);
@@ -65,9 +60,7 @@ async function extractContract(text) {
     let contrato = null;
   
     try {
-  
-      const model = await genAI.getGenerativeModel({ model: 'gemini-pro' });
-  
+
       const prompt = `Tengo un texto extraído de una factura. Mi objetivo es identificar el número de contrato o de pago de la misma.
   
       El texto extraído es el siguiente:
@@ -88,7 +81,6 @@ async function extractContract(text) {
   
       // Enviar el prompt al modelo
       const result = await model.generateContent(prompt);
-      console.log('Respuesta recibida para el tipo de factura:', result);
   
       // Almacenar directamente el texto de la respuesta
       contrato = result.response.text().trim();
@@ -105,11 +97,7 @@ async function extractDetails(text) {
     let precio = null;
 
     try {
-      console.log('Iniciando proceso para extraer el precio de la factura...');
-      console.log('Texto recibido:', text);
-  
-      const model = await genAI.getGenerativeModel({ model: 'gemini-pro' });
-  
+ 
       // Prompt modificado para obtener solo el precio sin etiquetas
       const prompt = `Tengo un texto extraído de una factura. Mi objetivo es obtener el precio total de la factura.
   
@@ -124,13 +112,10 @@ async function extractDetails(text) {
       123.45
   
       Aumenta la precisión para que solo el precio total sea devuelto en el formato indicado.`;
-  
-      console.log('Prompt creado para el precio:', prompt);
-  
+   
       // Enviar el prompt al modelo
       const result = await model.generateContent(prompt);
-      console.log('Respuesta recibida para el precio:', result);
-  
+ 
       // Almacenar directamente el texto de la respuesta
       precio = result.response.text().trim();
       console.log('Precio extraído:', precio);
@@ -143,13 +128,9 @@ async function extractDetails(text) {
 }
 
 async function extractUser(text) {
-    let beneficiario = null;
+  let beneficiario = null;
 
   try {
-    console.log('Iniciando proceso para extraer el beneficiario de la factura...');
-    console.log('Texto recibido:', text);
-
-    const model = await genAI.getGenerativeModel({ model: 'gemini-pro' });
 
     // Prompt modificado para obtener solo el nombre del beneficiario sin etiquetas
     const prompt = `Tengo un texto extraído de una factura. Mi objetivo es obtener el nombre del beneficiario de la factura.
@@ -166,11 +147,8 @@ async function extractUser(text) {
 
     Aumenta la precisión para que solo el nombre del beneficiario sea devuelto en el formato indicado.`;
 
-    console.log('Prompt creado para el beneficiario:', prompt);
-
     // Enviar el prompt al modelo
     const result = await model.generateContent(prompt);
-    console.log('Respuesta recibida para el beneficiario:', result);
 
     // Almacenar directamente el texto de la respuesta
     beneficiario = result.response.text().trim();
@@ -182,6 +160,88 @@ async function extractUser(text) {
 
   return beneficiario;
 }
-  
 
-module.exports = { extractDetails, extractUser, extractType, extractContract };
+
+async function extractMoreData(text, imageData) {
+  let moreData = null;
+
+  try {
+    const prompt = `Tengo un texto extraído de una factura. Mi objetivo es obtener el nombre del beneficiario de la factura.
+
+    El texto extraído es el siguiente:
+
+    "${text}"
+    
+    Necesito que respondas SOLAMENTE respondas 
+      la empresa encargada, 
+      la fecha de pago, 
+      la fecha de suspension, 
+      consumo anterior, 
+      consumo actual, 
+      consumo del periodo, 
+      ultimo pago realizado y 
+      valor del ultimo pago. 
+      
+    Separadas por "-", en caso de no encontrar un dato, buscarlos en la imagen, y si aun asi no se encuentra, establecer en su seccion "No se encontro informacion". ESTO ES DE GRAN IMPORTANCIA.
+
+    POR EJEMPLO:
+
+    Celsia-25 de septiembre-No se encontro informacion
+
+    Aumenta la precisión para que solo el nombre del beneficiario sea devuelto en el formato indicado.`;
+
+    const image = {
+      inlineData: {
+        data: imageData,
+        mimeType: "image/jpeg",
+      },
+    };
+    const result = await model.generateContent([prompt, image]);
+    moreData = result.response.text();
+
+  } catch (error) {
+    console.log('Error extrayendo los demas datos:', error)
+  }
+
+  return moreData;
+
+}
+
+async function extractRecord(imageData) {
+  let record = {};
+
+  try {
+
+    const prompt = `Necesito que respondas SOLAMENTE los 3 ultimos meses y su gasto, ademas separalo por comas. ESTO ES DE GRAN IMPORTANCIA.
+
+    POR EJEMPLO:
+
+    MAYO-31, JUNIO-18, JULIO-20
+
+    Aumenta la precisión para que solo el nombre del beneficiario sea devuelto en el formato indicado.`;
+
+    const image = {
+      inlineData: {
+        data: imageData,
+        mimeType: "image/jpeg",
+      },
+    };
+    const result = await model.generateContent([prompt, image]);
+    data = result.response.text();
+    
+    const items = data.split(", ");
+
+    items.forEach(item => {
+      const [month, value] = item.split("-");
+      record[month] = parseInt(value, 10);
+    });
+
+  } catch(error) {
+    console.error('Error extrayendo el registro:', error);
+  }
+
+  console.log(record);
+  return record;
+}
+
+module.exports = { extractDetails, extractUser, extractType, extractContract, extractMoreData, extractRecord};

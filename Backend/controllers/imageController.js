@@ -1,5 +1,5 @@
 const { analyzeImage, extractTextFromImage } = require('../services/azureVisionService');
-const { extractDetails, extractUser, extractType, extractContract } = require('../services/geminiService');
+const { extractDetails, extractUser, extractType, extractContract, extractMoreData, extractRecord } = require('../services/geminiService');
 
 const analyzeImageHandler = async (req, res) => {
   if (!req.file || !req.file.mimetype.startsWith('image/')) {
@@ -23,6 +23,7 @@ const extractTextHandler = async (req, res) => {
   }
 
   const imageBuffer = req.file.buffer;
+  const imageData = imageBuffer.toString('base64');
 
   try {
     const ocrResult = await extractTextFromImage(imageBuffer);
@@ -30,14 +31,19 @@ const extractTextHandler = async (req, res) => {
     const extractedText = ocrResult.regions
       .map(region => region.lines.map(line => line.words.map(word => word.text).join(' ')).join(' '))
       .join(' ');
+    
+    console.log('\nTexto extraido: \n', extractedText, '\n');  
+      
     // Extraer el precio y el beneficiario de la factura en consultas separadas
     const tipo = await extractType(extractedText);
     const contrato = await extractContract(extractedText);
     const precio = await extractDetails(extractedText);
     const beneficiario = await extractUser(extractedText);
+    const moreDetails = await extractMoreData(extractedText, imageData);
+    const record = await extractRecord(imageData);
 
     if (precio || beneficiario || tipo || contrato) {
-      res.json({ éxito: true, textoExtraído: contrato, tipo, precio, beneficiario });
+      res.json({ éxito: true, textoExtraído: contrato, tipo, precio, beneficiario, moreDetails, record });
     } else {
       res.json({ éxito: true, textoExtraído: extractedText, mensaje: 'No se encontraron datos válidos en el texto.' });
     }
@@ -47,4 +53,4 @@ const extractTextHandler = async (req, res) => {
   }
 };
 
-module.exports = { analyzeImageHandler, extractTextHandler, };
+module.exports = { analyzeImageHandler, extractTextHandler };
