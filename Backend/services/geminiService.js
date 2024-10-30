@@ -186,7 +186,7 @@ async function extractMoreData(text, imageData) {
 
     POR EJEMPLO:
 
-    Celsia-25 de septiembre-No se encontro informacion
+    Celsia-25 de septiembre-No se encontro informacion-178-200-180-27 de agosto 2025-100,250.00
 
     Aumenta la precisión para que solo el nombre del beneficiario sea devuelto en el formato indicado.`;
 

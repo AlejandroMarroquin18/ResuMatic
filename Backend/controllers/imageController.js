@@ -40,10 +40,22 @@ const extractTextHandler = async (req, res) => {
     const precio = await extractDetails(extractedText);
     const beneficiario = await extractUser(extractedText);
     const moreDetails = await extractMoreData(extractedText, imageData);
+    
+    const parts = moreDetails.split("-");
+
+    const empresa = parts[0];
+    const fechaPago = parts[1];
+    const fechaSuspension = parts[2];
+    const consumoAnterior = parts[3];
+    const consumoActual = parts[4];
+    const consumoPeriodo = parts[5];
+    const fechaUltimoPago = parts[6];
+    const valorUltimoPago = parts[7];
+    
     const record = await extractRecord(imageData);
 
     if (precio || beneficiario || tipo || contrato) {
-      res.json({ éxito: true, textoExtraído: contrato, tipo, precio, beneficiario, moreDetails, record });
+      res.json({ éxito: true, textoExtraído: contrato, tipo, precio, beneficiario, empresa, fechaPago, fechaSuspension, consumoAnterior, consumoActual, consumoPeriodo, fechaUltimoPago, valorUltimoPago, record });
     } else {
       res.json({ éxito: true, textoExtraído: extractedText, mensaje: 'No se encontraron datos válidos en el texto.' });
     }
