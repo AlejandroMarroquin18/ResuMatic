@@ -55,7 +55,7 @@ const extractTextHandler = async (req, res) => {
     const record = await extractRecord(imageData);
 
     if (precio || beneficiario || tipo || contrato) {
-      res.json({ éxito: true, textoExtraído: contrato, tipo, precio, beneficiario, empresa, fechaPago, fechaSuspension, consumoAnterior, consumoActual, consumoPeriodo, fechaUltimoPago, valorUltimoPago, record });
+      res.json({ contrato, tipo, precio, beneficiario, empresa, fechaPago, fechaSuspension, consumoAnterior, consumoActual, consumoPeriodo, fechaUltimoPago, valorUltimoPago, record });
     } else {
       res.json({ éxito: true, textoExtraído: extractedText, mensaje: 'No se encontraron datos válidos en el texto.' });
     }

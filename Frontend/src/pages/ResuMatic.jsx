@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Button, Typography, Tabs, Tab, Card, CardContent, CardHeader, Divider, Grid } from '@mui/material';
 import { UploadFile, Description, BarChart, Payment, InsertDriveFile } from '@mui/icons-material';
 
@@ -20,7 +20,7 @@ export default function ResuMatic() {
     formData.append('image', file);
 
     try {
-      const response = await fetch('http://localhost:3000/analyze-image', {
+      const response = await fetch('http://localhost:3000/extract-text', {
         method: 'POST',
         body: formData,
       });
@@ -32,7 +32,8 @@ export default function ResuMatic() {
       }
 
       const data = await response.json();
-      setBillData(data.datos);
+      console.log("Datos recibidos del backend:", data);
+      setBillData(data);
     } catch (error) {
       console.error('Error en el análisis de la imagen:', error);
       alert('Error al analizar la imagen');
@@ -43,13 +44,17 @@ export default function ResuMatic() {
     setTabValue(newValue);
   };
 
+  useEffect(() => {
+    console.log("Actualización de billData:", billData);
+  }, [billData]);
+
   // Configuración de datos y opciones para el gráfico de barras
   const chartData = {
     labels: billData ? Object.keys(billData.consumptionData || {}) : [],
     datasets: [
       {
         label: 'Consumo Mensual',
-        data: billData ? Object.values(billData.consumptionData || {}) : [],
+        data: billData ? Object.values(billData.consumoActual || {}) : [],
         backgroundColor: 'rgba(75, 192, 192, 0.6)',
         borderColor: 'rgba(75, 192, 192, 1)',
         borderWidth: 1,
@@ -172,11 +177,19 @@ export default function ResuMatic() {
 
                   {tabValue === 0 && (
                     <Box sx={{ marginTop: 2, textAlign: 'left', color: '#2c3e50' }}>
-                      <Typography>Servicio: {billData.service}</Typography>
-                      <Typography>Número de Contrato: {billData.contractNumber}</Typography>
-                      <Typography>Consumo Actual: {billData.currentConsumption} kWh</Typography>
-                      <Typography>Monto a Pagar: ${billData.totalAmount}</Typography>
-                      <Typography>Fecha de Vencimiento: {billData.dueDate}</Typography>
+                      <Typography variant="subtitle1">Tipo: {billData.tipo}</Typography>
+                      <Typography variant="subtitle1">Contrato: {billData.contrato}</Typography>
+                      <Typography variant="subtitle1">Precio: {billData.precio}</Typography>
+                      <Typography variant="subtitle1">Beneficiario: {billData.beneficiario}</Typography>
+                      <Typography variant="subtitle1">Empresa: {billData.empresa}</Typography>
+                      <Typography variant="subtitle1">Fecha de Pago: {billData.fechaPago}</Typography>
+                      <Typography variant="subtitle1">Fecha de Suspensión: {billData.fechaSuspension}</Typography>
+                      <Typography variant="subtitle1">Consumo Anterior: {billData.consumoAnterior} kWh</Typography>
+                      <Typography variant="subtitle1">Consumo Actual: {billData.consumoActual} kWh</Typography>
+                      <Typography variant="subtitle1">Consumo del Período: {billData.consumoPeriodo} kWh</Typography>
+                      <Typography variant="subtitle1">Último Pago: {billData.fechaUltimoPago}</Typography>
+                      <Typography variant="subtitle1">Valor del Último Pago: {billData.valorUltimoPago}</Typography>
+                      <Typography variant="subtitle1">Registro: {JSON.stringify(billData.record)}</Typography>
                     </Box>
                   )}
                 </>
