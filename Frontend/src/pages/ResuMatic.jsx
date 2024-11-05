@@ -20,7 +20,7 @@ export default function ResuMatic() {
     formData.append('image', file);
 
     try {
-      const response = await fetch('http://localhost:3000/extract-text', {
+      const response = await fetch('https://resumatic-mbix.onrender.com/extract-text', {
         method: 'POST',
         body: formData,
       });
