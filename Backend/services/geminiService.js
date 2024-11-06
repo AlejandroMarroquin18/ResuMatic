@@ -234,6 +234,7 @@ async function extractRecord(imageData) {
     items.forEach(item => {
       const [month, value] = item.split("-");
       record.push({name: month, consumo: parseInt(value, 10)});
+      //record[month] = parseInt(value, 10);
     });
 
   } catch(error) {

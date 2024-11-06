@@ -21,10 +21,11 @@ export default function ResuMatic() {
     formData.append('image', file);
 
     try {
-      const response = await fetch('https://resumatic-mbix.onrender.com/extract-text', {
+      //const response = await fetch('https://resumatic-mbix.onrender.com/extract-text', {
+      const response = await fetch('http://localhost:3000/extract-text', {  
         method: 'POST',
         body: formData,
-      });
+    });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -173,7 +174,6 @@ export default function ResuMatic() {
                   >
                     <Tab icon={<Description />} label="Todos" />
                     <Tab icon={<BarChart />} label="Consumo" />
-                    <Tab icon={<Payment />} label="Pago" />
                   </Tabs>
 
                   {tabValue === 0 && (
@@ -207,6 +207,7 @@ export default function ResuMatic() {
                     </Box>
                   )}
                   
+                  {}
 
                 </>
               ) : (
