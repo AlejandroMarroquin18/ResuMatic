@@ -208,7 +208,7 @@ async function extractMoreData(text, imageData) {
 }
 
 async function extractRecord(imageData) {
-  let record = {};
+  let record = [];
 
   try {
 
@@ -233,7 +233,7 @@ async function extractRecord(imageData) {
 
     items.forEach(item => {
       const [month, value] = item.split("-");
-      record[month] = parseInt(value, 10);
+      record.push({name: month, consumo: parseInt(value, 10)});
     });
 
   } catch(error) {
