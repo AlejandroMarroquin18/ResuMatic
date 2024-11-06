@@ -173,7 +173,6 @@ export default function ResuMatic() {
                   >
                     <Tab icon={<Description />} label="Todos" />
                     <Tab icon={<BarChart />} label="Consumo" />
-                    <Tab icon={<Payment />} label="Pago" />
                   </Tabs>
 
                   {tabValue === 0 && (
