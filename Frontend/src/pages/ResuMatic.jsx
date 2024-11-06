@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Typography, Tabs, Tab, Card, CardContent, CardHeader, Divider, Grid } from '@mui/material';
 import { UploadFile, Description, BarChart, Payment, InsertDriveFile } from '@mui/icons-material';
+import { BarChart as ReBarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 
 export default function ResuMatic() {
   const [file, setFile] = useState(null);
@@ -177,7 +178,6 @@ export default function ResuMatic() {
 
                   {tabValue === 0 && (
                     <Box sx={{ marginTop: 2, textAlign: 'left', color: '#2c3e50' }}>
-                      <Typography variant="subtitle1">Tipo: {billData.tipo}</Typography>
                       <Typography variant="subtitle1">Contrato: {billData.contrato}</Typography>
                       <Typography variant="subtitle1">Precio: {billData.precio}</Typography>
                       <Typography variant="subtitle1">Beneficiario: {billData.beneficiario}</Typography>
@@ -189,9 +189,25 @@ export default function ResuMatic() {
                       <Typography variant="subtitle1">Consumo del Período: {billData.consumoPeriodo} kWh</Typography>
                       <Typography variant="subtitle1">Último Pago: {billData.fechaUltimoPago}</Typography>
                       <Typography variant="subtitle1">Valor del Último Pago: {billData.valorUltimoPago}</Typography>
-                      <Typography variant="subtitle1">Registro: {JSON.stringify(billData.record)}</Typography>
                     </Box>
                   )}
+
+                  {tabValue === 1 && (
+                    <Box sx={{ marginTop: 2, textAlign: 'center', color: '#2c3e50' }}>
+                      <Typography variant="h6">Gráfico de Consumo</Typography>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <ReBarChart data={billData.record} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar dataKey="consumo" fill="#8884d8" />
+                        </ReBarChart>
+                      </ResponsiveContainer>
+                    </Box>
+                  )}
+                  
+
                 </>
               ) : (
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#757575', mt: 3 }}>
